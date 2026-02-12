@@ -11,7 +11,7 @@ TERMUX_PKG_AUTO_UPDATE=false
 # Note that we do not use a shared libuv to avoid an issue with the Android
 # linker, which does not use symbols of linked shared libraries when resolving
 # symbols on dlopen(). See https://github.com/termux/termux-packages/issues/462.
-TERMUX_PKG_DEPENDS="libc++, openssl, c-ares, libicu, libsqlite, zlib"
+TERMUX_PKG_DEPENDS="libc++, openssl-static, zlib-static"
 TERMUX_PKG_RECOMMENDS="npm"
 TERMUX_PKG_CONFLICTS="nodejs-lts, nodejs-current"
 TERMUX_PKG_BREAKS="nodejs-dev"
@@ -157,12 +157,16 @@ termux_step_configure() {
 		--prefix=$TERMUX_PREFIX \
 		--dest-cpu=$DEST_CPU \
 		--dest-os=android \
+		--without-amaro \
+		--without-inspector \
+		--without-intl \
 		--without-npm \
-		--shared-cares \
+		--without-sqlite \
 		--shared-openssl \
-		--shared-sqlite \
+		--shared-openssl-libname ":libcrypto.a,:libssl.a" \
 		--shared-zlib \
-		--with-intl=system-icu \
+		--shared-zlib-libname ":libz.a" \
+		--partly-static \
 		--cross-compiling \
 		--ninja \
 		"${_DEBUG[@]}"
