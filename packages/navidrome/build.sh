@@ -2,10 +2,9 @@ TERMUX_PKG_HOMEPAGE=https://www.navidrome.org/
 TERMUX_PKG_DESCRIPTION="Modern Music Server and Streamer compatible with Subsonic/Airsonic"
 TERMUX_PKG_LICENSE="GPL-3.0"
 TERMUX_PKG_MAINTAINER="2096779623 <admin@utermux.dev>"
-TERMUX_PKG_VERSION="0.60.2"
-TERMUX_PKG_REVISION=1
+TERMUX_PKG_VERSION="0.61.0"
 TERMUX_PKG_SRCURL="https://github.com/navidrome/navidrome/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz"
-TERMUX_PKG_SHA256=1189697b8de66d443fea512de20c2a7064a985e171c6f0ff0cc8f0d7fb496e68
+TERMUX_PKG_SHA256=818e2e80845b18cf17f4b3afff7d889f51abd814212ff672a1587c6f62fd4e4a
 TERMUX_PKG_DEPENDS="taglib, ffmpeg"
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_AUTO_UPDATE=true
@@ -32,7 +31,7 @@ termux_step_make() {
 	go build -v -ldflags="
 	-X github.com/navidrome/navidrome/consts.gitSha=$GIT_SHA \
 	-X github.com/navidrome/navidrome/consts.gitTag=$GIT_TAG-SNAPSHOT" \
-	-tags=netgo \
+	-tags=netgo,sqlite_fts5 \
 	-o navidrome
 }
 
