@@ -1,0 +1,12 @@
+diff -rub node-v25.8.2/src/node.cc node-v25.8.2-new/src/node.cc
+--- node-v25.8.2/src/node.cc	2026-03-24 17:08:08.000000000 +0800
++++ node-v25.8.2-new/src/node.cc	2026-04-02 10:44:10.555468052 +0800
+@@ -1173,7 +1173,7 @@
+     OPENSSL_INIT_set_config_file_flags(settings,
+                                        CONF_MFLAGS_IGNORE_MISSING_FILE);
+ 
+-    OPENSSL_init_crypto(OPENSSL_INIT_LOAD_CONFIG, settings);
++    OPENSSL_init_crypto(OPENSSL_INIT_NO_LOAD_CONFIG, settings);
+     OPENSSL_INIT_free(settings);
+ 
+     if (ERR_peek_error() != 0) {
