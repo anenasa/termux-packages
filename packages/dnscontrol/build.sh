@@ -1,10 +1,10 @@
-TERMUX_PKG_HOMEPAGE=https://github.com/StackExchange/dnscontrol
+TERMUX_PKG_HOMEPAGE=https://dnscontrol.org/
 TERMUX_PKG_DESCRIPTION="Infrastructure as code for DNS!"
 TERMUX_PKG_LICENSE="MIT"
 TERMUX_PKG_MAINTAINER="Izumi Sena Sora <info@unordinary.eu.org>"
-TERMUX_PKG_VERSION="4.42.0"
-TERMUX_PKG_SRCURL="https://github.com/StackExchange/dnscontrol/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz"
-TERMUX_PKG_SHA256=db08d6e6b07b4eeb5e8be6ddaec56023e53f39d68b1073de9ea0d4d62df47dda
+TERMUX_PKG_VERSION="5.7.1"
+TERMUX_PKG_SRCURL="https://github.com/DNSControl/dnscontrol/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz"
+TERMUX_PKG_SHA256=5cf90a69313c601768d58719e48b934fe5995fa18fe48dc6f0036124d27ab52b
 TERMUX_PKG_BUILD_IN_SRC=true
 TERMUX_PKG_AUTO_UPDATE=true
 

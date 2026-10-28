@@ -1,4 +1,7 @@
 #include <dlfcn.h>
+#include <pthread.h>
+
+#include "platform-ns.h"
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 #include <android/choreographer.h>
@@ -20,6 +23,9 @@
 #include <android/surface_texture_jni.h>
 #include <android/trace.h>
 
+struct native_handle;
+const struct native_handle* AHardwareBuffer_getNativeHandle(const AHardwareBuffer* buffer);
+
 #ifdef __LP64__
 #define LIB "/system/lib64/libandroid.so"
 #else
@@ -37,7 +43,8 @@
     f(AHardwareBuffer_lock) \
     f(AHardwareBuffer_unlock) \
     f(AHardwareBuffer_sendHandleToUnixSocket) \
-    f(AHardwareBuffer_recvHandleFromUnixSocket)
+    f(AHardwareBuffer_recvHandleFromUnixSocket) \
+    f(AHardwareBuffer_getNativeHandle)
 #else
 #define AHardwareBuffer_API26_FUNCTIONS_1(f)
 #endif
@@ -324,8 +331,11 @@ static struct {
 } stubs;
 #undef STUB
 
-__attribute__((constructor)) static void init() {
-    void* handle = dlopen(LIB, RTLD_LOCAL);
+static pthread_once_t loaded_once = PTHREAD_ONCE_INIT;
+
+static void load_stubs(void) {
+
+    void* handle = platform_dlopen(LIB, RTLD_LOCAL);
     // Nothing bad happened, normal case for termux-docker.
     if (!handle)
         return;
@@ -334,7 +344,11 @@ __attribute__((constructor)) static void init() {
 #undef LOAD
 }
 
-#define CALL(f, def, ...) if (!stubs.f) return def; else return (stubs.f)(__VA_ARGS__)
+static inline void ensure_loaded(void) {
+    pthread_once(&loaded_once, load_stubs);
+}
+
+#define CALL(f, def, ...) ensure_loaded(); if (!stubs.f) return def; else return (stubs.f)(__VA_ARGS__)
 
 AAssetDir* AAssetManager_openDir(AAssetManager* mgr, const char* dirName) {
     CALL(AAssetManager_openDir, NULL, mgr, dirName);
@@ -651,6 +665,10 @@ int AHardwareBuffer_sendHandleToUnixSocket(const AHardwareBuffer* _Nonnull buffe
 
 int AHardwareBuffer_recvHandleFromUnixSocket(int socketFd, AHardwareBuffer* _Nullable* _Nonnull outBuffer) {
     CALL(AHardwareBuffer_recvHandleFromUnixSocket, 0, socketFd, outBuffer);
+}
+
+const struct native_handle* AHardwareBuffer_getNativeHandle(const AHardwareBuffer* buffer) {
+    CALL(AHardwareBuffer_getNativeHandle, NULL, buffer);
 }
 #endif
 

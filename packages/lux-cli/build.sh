@@ -2,9 +2,9 @@ TERMUX_PKG_HOMEPAGE=https://lux.lumen-labs.org
 TERMUX_PKG_DESCRIPTION="A package manager for Lua, similar to luarocks"
 TERMUX_PKG_LICENSE="LGPL-3.0-or-later"
 TERMUX_PKG_MAINTAINER="@termux"
-TERMUX_PKG_VERSION="0.36.1"
+TERMUX_PKG_VERSION="0.49.4"
 TERMUX_PKG_SRCURL="https://github.com/lumen-oss/lux/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz"
-TERMUX_PKG_SHA256=ba720c9b1a8dc11fdb3c3013c09a3a4392484e24488a312e29d817ffaa8627c9
+TERMUX_PKG_SHA256=ac162a3368b7b08d1ad6da520a0b68eea8f6192678435626262c9504827c81bb
 TERMUX_PKG_DEPENDS="bzip2, gpgme, libgit2, libgpg-error, lua54, openssl, xz-utils"
 TERMUX_PKG_PROVIDES="lx"
 TERMUX_PKG_AUTO_UPDATE=true
@@ -52,6 +52,25 @@ termux_step_host_build() {
 	cd "${TERMUX_PKG_SRCDIR}" || termux_error_exit "Couldn't enter source code directory: ${TERMUX_PKG_SRCDIR}"
 
 	termux_setup_rust
+
+	termux_download_ubuntu_packages libgpgme-dev libassuan-dev
+
+	local HOSTBUILD_ROOTFS="$TERMUX_PKG_HOSTBUILD_DIR/ubuntu_packages"
+	local HOSTBUILD_ARCH_LIBDIR="/usr/lib/x86_64-linux-gnu"
+
+	find "${HOSTBUILD_ROOTFS}" -type f -name '*.pc' | \
+		xargs -n 1 sed -i -e "s|/usr|${HOSTBUILD_ROOTFS}/usr|g"
+	# delete all static libraries to prevent errors:
+	# rust-lld: error: undefined symbol: assuan_set_flag
+	# referenced by engine-assuan.o:(llass_new) in archive
+	# /home/builder/.termux-build/lux-cli/host-build/ubuntu_packages
+	# /usr/lib/x86_64-linux-gnu/libgpgme.a
+	find "${HOSTBUILD_ROOTFS}" -type f -name '*.a' -delete
+	find "${HOSTBUILD_ROOTFS}${HOSTBUILD_ARCH_LIBDIR}" -xtype l \
+		-exec sh -c "ln -snvf ${HOSTBUILD_ARCH_LIBDIR}/\$(readlink \$1) \$1" sh {} \;
+
+	PKG_CONFIG_PATH_x86_64_unknown_linux_gnu="${HOSTBUILD_ROOTFS}${HOSTBUILD_ARCH_LIBDIR}/pkgconfig"
+	export PKG_CONFIG_PATH_x86_64_unknown_linux_gnu
 
 	cargo fetch --locked
 
